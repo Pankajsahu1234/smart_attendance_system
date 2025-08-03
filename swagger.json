@@ -1,0 +1,524 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Smart Attendance System API",
+        "description": "API for managing attendance using QR codes, authentication, and role-based access for students and teachers.",
+        "version": "1.0.0"
+    },
+    "servers": [
+        { "url": "http://localhost:3001/api" }
+    ],
+    "components": {
+        "securitySchemes": {
+            "BearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        },
+        "schemas": {
+            "Error": {
+                "type": "object",
+                "properties": {
+                    "success": { "type": "boolean", "example": false },
+                    "message": { "type": "string" },
+                    "details": { "type": "string", "example": "Validation error" }
+                }
+            },
+            "LoginResponse": {
+                "type": "object",
+                "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "message": { "type": "string", "example": "Login successful" },
+                    "data": {
+                        "type": "object",
+                        "properties": {
+                            "accessToken": { "type": "string" },
+                            "refreshToken": { "type": "string" },
+                            "refreshTokenExpiresAt": { "type": "string", "format": "date-time" },
+                            "user": {
+                                "type": "object",
+                                "properties": {
+                                    "userId": { "type": "integer" },
+                                    "email": { "type": "string", "format": "email" },
+                                    "role": { "type": "string", "enum": ["student", "teacher"] },
+                                    "profile": {
+                                        "type": "object",
+                                        "properties": {
+                                            "student_id": { "type": "integer" },
+                                            "enrollment_no": { "type": "string" },
+                                            "name": { "type": "string" },
+                                            "phone_no": { "type": "string" },
+                                            "branch": { "type": "string" },
+                                            "year": { "type": "integer" },
+                                            "teacher_id": { "type": "integer" },
+                                            "employee_code": { "type": "string" },
+                                            "mobile_no": { "type": "string" }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "QRSessionResponse": {
+                "type": "object",
+                "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "message": { "type": "string", "example": "QR session created successfully" },
+                    "data": {
+                        "type": "object",
+                        "properties": {
+                            "qrId": { "type": "integer" },
+                            "qrToken": { "type": "string" },
+                            "qrCodeImage": { "type": "string", "format": "uri" },
+                            "subjectId": { "type": "integer" },
+                            "startTime": { "type": "string" },
+                            "endTime": { "type": "string" },
+                            "latitude": { "type": "number" },
+                            "longitude": { "type": "number" }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "paths": {
+        "/auth/login": {
+            "post": {
+                "summary": "User login",
+                "tags": ["Authentication"],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "email": { "type": "string", "format": "email", "example": "test@example.com" },
+                                    "password": { "type": "string", "minLength": 6, "example": "test123" }
+                                },
+                                "required": ["email", "password"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "Login successful", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/LoginResponse" } } } },
+                    "401": { "description": "Invalid credentials", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+                    "500": { "description": "Server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+                }
+            }
+        },
+        "/auth/register": {
+            "post": {
+                "summary": "User registration",
+                "tags": ["Authentication"],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "email": { "type": "string", "format": "email", "example": "test@example.com" },
+                                    "password": { "type": "string", "minLength": 6, "example": "test123" },
+                                    "role": { "type": "string", "enum": ["student", "teacher"], "example": "student" },
+                                    "referenceId": { "type": "integer", "example": 1 }
+                                },
+                                "required": ["email", "password", "role", "referenceId"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": { "description": "User registered", "content": { "application/json": { "schema": { "type": "object", "properties": { "success": { "type": "boolean", "example": true }, "message": { "type": "string", "example": "User registered successfully" }, "data": { "type": "object", "properties": { "userId": { "type": "integer" } } } } } } } },
+                    "400": { "description": "Invalid input", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+                    "500": { "description": "Server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+                }
+            }
+        },
+        "/auth/refresh-token": {
+            "post": {
+                "summary": "Refresh access token",
+                "tags": ["Authentication"],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "refreshToken": { "type": "string", "example": "your_refresh_token" }
+                                },
+                                "required": ["refreshToken"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "Token refreshed", "content": { "application/json": { "schema": { "type": "object", "properties": { "success": { "type": "boolean", "example": true }, "message": { "type": "string", "example": "Token refreshed successfully" }, "data": { "type": "object", "properties": { "accessToken": { "type": "string" }, "refreshToken": { "type": "string" }, "refreshTokenExpiresAt": { "type": "string", "format": "date-time" } } } } } } } },
+                    "401": { "description": "Invalid refresh token", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+                    "500": { "description": "Server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+                }
+            }
+        },
+        "/auth/logout": {
+            "post": {
+                "summary": "User logout",
+                "tags": ["Authentication"],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "refreshToken": { "type": "string", "example": "your_refresh_token" }
+                                },
+                                "required": ["refreshToken"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "Logged out successfully", "content": { "application/json": { "schema": { "type": "object", "properties": { "success": { "type": "boolean", "example": true }, "message": { "type": "string", "example": "Logged out successfully" } } } } } },
+                    "500": { "description": "Server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+                }
+            }
+        },
+        "/auth/send-otp": {
+            "post": {
+                "summary": "Send OTP for password reset",
+                "tags": ["Authentication"],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "email": { "type": "string", "format": "email", "example": "test@example.com" }
+                                },
+                                "required": ["email"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "OTP sent", "content": { "application/json": { "schema": { "type": "object", "properties": { "success": { "type": "boolean", "example": true }, "message": { "type": "string", "example": "OTP sent to email" } } } } } },
+                    "404": { "description": "Email not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+                    "500": { "description": "Server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+                }
+            }
+        },
+        "/auth/verify-otp": {
+            "post": {
+                "summary": "Verify OTP for password reset",
+                "tags": ["Authentication"],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "email": { "type": "string", "format": "email", "example": "test@example.com" },
+                                    "otp": { "type": "string", "minLength": 6, "maxLength": 6, "example": "123456" }
+                                },
+                                "required": ["email", "otp"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "OTP verified successfully", "content": { "application/json": { "schema": { "type": "object", "properties": { "success": { "type": "boolean", "example": true }, "message": { "type": "string", "example": "OTP verified successfully" } } } } } },
+                    "400": { "description": "Invalid or expired OTP", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+                    "500": { "description": "Server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+                }
+            }
+        },
+        "/auth/reset-password": {
+            "post": {
+                "summary": "Reset password using OTP",
+                "tags": ["Authentication"],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "email": { "type": "string", "format": "email", "example": "test@example.com" },
+                                    "otp": { "type": "string", "minLength": 6, "maxLength": 6, "example": "123456" },
+                                    "newPassword": { "type": "string", "minLength": 6, "example": "newpass123" }
+                                },
+                                "required": ["email", "otp", "newPassword"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "Password reset successfully", "content": { "application/json": { "schema": { "type": "object", "properties": { "success": { "type": "boolean", "example": true }, "message": { "type": "string", "example": "Password reset successfully" } } } } } },
+                    "400": { "description": "Invalid OTP", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+                    "500": { "description": "Server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+                }
+            }
+        },
+        "/auth/profile": {
+            "get": {
+                "summary": "Get user profile",
+                "tags": ["Authentication"],
+                "security": [{ "BearerAuth": [] }],
+                "responses": {
+                    "200": { "description": "Profile retrieved", "content": { "application/json": { "schema": { "type": "object", "properties": { "success": { "type": "boolean", "example": true }, "data": { "type": "object", "properties": { "userId": { "type": "integer" }, "role": { "type": "string", "enum": ["student", "teacher"] }, "profile": { "type": "object" } } } } } } } },
+                    "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+                    "500": { "description": "Server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+                }
+            }
+        },
+        "/student/attendance": {
+            "post": {
+                "summary": "Mark attendance using QR code",
+                "tags": ["Student"],
+                "security": [{ "BearerAuth": [] }],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "qrToken": { "type": "string", "example": "QR_16987654321_uuid" },
+                                    "latitude": { "type": "number", "minimum": -90, "maximum": 90, "example": 23.259933 },
+                                    "longitude": { "type": "number", "minimum": -180, "maximum": 180, "example": 77.412615 }
+                                },
+                                "required": ["qrToken", "latitude", "longitude"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": { "description": "Attendance marked", "content": { "application/json": { "schema": { "type": "object", "properties": { "success": { "type": "boolean", "example": true }, "message": { "type": "string", "example": "Attendance marked successfully" }, "data": { "type": "object" } } } } } },
+                    "400": { "description": "Invalid QR code or location", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+                    "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+                }
+            }
+        },
+        "/student/attendance/history": {
+            "get": {
+                "summary": "Get attendance history",
+                "tags": ["Student"],
+                "security": [{ "BearerAuth": [] }],
+                "parameters": [
+                    { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+                    { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 10 } },
+                    { "name": "subjectId", "in": "query", "schema": { "type": "integer" } },
+                    { "name": "fromDate", "in": "query", "schema": { "type": "string", "format": "date" } },
+                    { "name": "toDate", "in": "query", "schema": { "type": "string", "format": "date" } }
+                ],
+                "responses": {
+                    "200": { "description": "Attendance history retrieved", "content": { "application/json": { "schema": { "type": "object", "properties": { "success": { "type": "boolean", "example": true }, "data": { "type": "object", "properties": { "attendance": { "type": "array" }, "total": { "type": "integer" } } } } } } } },
+                    "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+                }
+            }
+        },
+        "/student/subjects": {
+            "get": {
+                "summary": "Get student's subjects",
+                "tags": ["Student"],
+                "security": [{ "BearerAuth": [] }],
+                "responses": {
+                    "200": { "description": "Subjects retrieved", "content": { "application/json": { "schema": { "type": "object", "properties": { "success": { "type": "boolean", "example": true }, "data": { "type": "array", "items": { "type": "object", "properties": { "subjectId": { "type": "integer" }, "subjectName": { "type": "string" } } } } } } } } },
+                    "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+                }
+            }
+        },
+        "/student/attendance-stats": {
+            "get": {
+                "summary": "Get attendance statistics",
+                "tags": ["Student"],
+                "security": [{ "BearerAuth": [] }],
+                "parameters": [
+                    { "name": "subjectId", "in": "query", "schema": { "type": "integer" } }
+                ],
+                "responses": {
+                    "200": { "description": "Statistics retrieved", "content": { "application/json": { "schema": { "type": "object", "properties": { "success": { "type": "boolean", "example": true }, "data": { "type": "array", "items": { "type": "object" } } } } } } },
+                    "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+                }
+            }
+        },
+        "/teacher/subjects": {
+            "get": {
+                "summary": "Get teacher's subjects",
+                "tags": ["Teacher"],
+                "security": [{ "BearerAuth": [] }],
+                "responses": {
+                    "200": { "description": "Subjects retrieved", "content": { "application/json": { "schema": { "type": "object", "properties": { "success": { "type": "boolean", "example": true }, "data": { "type": "array", "items": { "type": "object", "properties": { "subjectId": { "type": "integer" }, "subjectName": { "type": "string" }, "studentCount": { "type": "integer" } } } } } } } } },
+                    "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+                }
+            }
+        },
+        "/teacher/qr-session": {
+            "post": {
+                "summary": "Create QR session",
+                "tags": ["Teacher"],
+                "security": [{ "BearerAuth": [] }],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "subjectId": { "type": "integer", "example": 1 },
+                                    "startTime": { "type": "string", "pattern": "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$", "example": "10:00" },
+                                    "endTime": { "type": "string", "pattern": "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$", "example": "11:00" },
+                                    "latitude": { "type": "number", "minimum": -90, "maximum": 90, "example": 23.259933 },
+                                    "longitude": { "type": "number", "minimum": -180, "maximum": 180, "example": 77.412615 }
+                                },
+                                "required": ["subjectId", "startTime", "endTime", "latitude", "longitude"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": { "description": "QR session created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/QRSessionResponse" } } } },
+                    "400": { "description": "Invalid input", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+                    "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+                }
+            }
+        },
+        "/teacher/qr-sessions/active": {
+            "get": {
+                "summary": "Get active QR sessions",
+                "tags": ["Teacher"],
+                "security": [{ "BearerAuth": [] }],
+                "responses": {
+                    "200": { "description": "Active sessions retrieved", "content": { "application/json": { "schema": { "type": "object", "properties": { "success": { "type": "boolean", "example": true }, "data": { "type": "array", "items": { "$ref": "#/components/schemas/QRSessionResponse" } } } } } } },
+                    "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+                }
+            }
+        },
+        "/teacher/attendance/{qrId}": {
+            "get": {
+                "summary": "Get attendance for a QR session",
+                "tags": ["Teacher"],
+                "security": [{ "BearerAuth": [] }],
+                "parameters": [
+                    { "name": "qrId", "in": "path", "required": true, "schema": { "type": "integer", "example": 1 } }
+                ],
+                "responses": {
+                    "200": { "description": "Attendance retrieved", "content": { "application/json": { "schema": { "type": "object", "properties": { "success": { "type": "boolean", "example": true }, "data": { "type": "array", "items": { "type": "object" } } } } } } },
+                    "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+                }
+            }
+        },
+        "/teacher/qr-session/{qrId}/close": {
+            "put": {
+                "summary": "Close a QR session",
+                "tags": ["Teacher"],
+                "security": [{ "BearerAuth": [] }],
+                "parameters": [
+                    { "name": "qrId", "in": "path", "required": true, "schema": { "type": "integer", "example": 1 } }
+                ],
+                "responses": {
+                    "200": { "description": "QR session closed", "content": { "application/json": { "schema": { "type": "object", "properties": { "success": { "type": "boolean", "example": true }, "message": { "type": "string", "example": "QR session closed successfully" } } } } } },
+                    "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+                }
+            }
+        },
+        "/teacher/attendance-stats": {
+            "get": {
+                "summary": "Get attendance statistics",
+                "tags": ["Teacher"],
+                "security": [{ "BearerAuth": [] }],
+                "parameters": [
+                    { "name": "subjectId", "in": "query", "schema": { "type": "integer" } },
+                    { "name": "fromDate", "in": "query", "schema": { "type": "string", "format": "date" } },
+                    { "name": "toDate", "in": "query", "schema": { "type": "string", "format": "date" } }
+                ],
+                "responses": {
+                    "200": { "description": "Statistics retrieved", "content": { "application/json": { "schema": { "type": "object", "properties": { "success": { "type": "boolean", "example": true }, "data": { "type": "array", "items": { "type": "object" } } } } } } },
+                    "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+                }
+            }
+        },
+        "/common/students": {
+            "get": {
+                "summary": "Get all students",
+                "tags": ["Common"],
+                "security": [{ "BearerAuth": [] }],
+                "parameters": [
+                    { "name": "branch", "in": "query", "schema": { "type": "string", "example": "CSE" } },
+                    { "name": "year", "in": "query", "schema": { "type": "integer", "example": 2 } },
+                    { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+                    { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 10 } }
+                ],
+                "responses": {
+                    "200": { "description": "Students retrieved", "content": { "application/json": { "schema": { "type": "object", "properties": { "success": { "type": "boolean", "example": true }, "data": { "type": "object", "properties": { "students": { "type": "array" }, "total": { "type": "integer" } } } } } } } },
+                    "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+                }
+            }
+        },
+        "/common/teachers": {
+            "get": {
+                "summary": "Get all teachers",
+                "tags": ["Common"],
+                "security": [{ "BearerAuth": [] }],
+                "responses": {
+                    "200": { "description": "Teachers retrieved", "content": { "application/json": { "schema": { "type": "object", "properties": { "success": { "type": "boolean", "example": true }, "data": { "type": "array", "items": { "type": "object" } } } } } } },
+                    "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+                }
+            }
+        },
+        "/common/branches": {
+            "get": {
+                "summary": "Get distinct branches",
+                "tags": ["Common"],
+                "security": [{ "BearerAuth": [] }],
+                "responses": {
+                    "200": { "description": "Branches retrieved", "content": { "application/json": { "schema": { "type": "object", "properties": { "success": { "type": "boolean", "example": true }, "data": { "type": "array", "items": { "type": "string" } } } } } } },
+                    "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+                }
+            }
+        },
+        "/common/years": {
+            "get": {
+                "summary": "Get distinct years",
+                "tags": ["Common"],
+                "security": [{ "BearerAuth": [] }],
+                "responses": {
+                    "200": { "description": "Years retrieved", "content": { "application/json": { "schema": { "type": "object", "properties": { "success": { "type": "boolean", "example": true }, "data": { "type": "array", "items": { "type": "integer" } } } } } } },
+                    "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+                }
+            }
+        },
+        "/common/search/students": {
+            "get": {
+                "summary": "Search students",
+                "tags": ["Common"],
+                "security": [{ "BearerAuth": [] }],
+                "parameters": [
+                    { "name": "q", "in": "query", "required": true, "schema": { "type": "string", "example": "John" } },
+                    { "name": "branch", "in": "query", "schema": { "type": "string", "example": "CSE" } },
+                    { "name": "year", "in": "query", "schema": { "type": "integer", "example": 2 } }
+                ],
+                "responses": {
+                    "200": { "description": "Search results retrieved", "content": { "application/json": { "schema": { "type": "object", "properties": { "success": { "type": "boolean", "example": true }, "data": { "type": "array", "items": { "type": "object" } } } } } } },
+                    "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+                }
+            }
+        },
+        "/health": {
+            "get": {
+                "summary": "Health check",
+                "tags": ["Health"],
+                "responses": {
+                    "200": { "description": "API is running", "content": { "application/json": { "schema": { "type": "object", "properties": { "success": { "type": "boolean", "example": true }, "message": { "type": "string", "example": "Smart Attendance System API is running" }, "timestamp": { "type": "string", "format": "date-time" }, "version": { "type": "string", "example": "1.0.0" } } } } } }
+                }
+            }
+        }
+    }
+}

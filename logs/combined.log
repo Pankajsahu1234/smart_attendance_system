@@ -1,0 +1,15 @@
+{"level":"info","message":"\n🚀 Smart Attendance System Backend Server Started!\n📡 Server running on port 3001\n🌍 Environment: development\n📅 Started at: 2025-08-02T09:18:54.093Z\n🔗 Health Check: http://localhost:3001/api/health\n🔗 API Docs: http://localhost:3001/api-docs\n    ","timestamp":"2025-08-02T09:18:54.095Z"}
+{"level":"info","message":"\n🚀 Smart Attendance System Backend Server Started!\n📡 Server running on port 3001\n🌍 Environment: development\n📅 Started at: 2025-08-02T09:19:09.979Z\n🔗 Health Check: http://localhost:3001/api/health\n🔗 API Docs: http://localhost:3001/api-docs\n    ","timestamp":"2025-08-02T09:19:09.981Z"}
+{"level":"info","message":"\n🚀 Smart Attendance System Backend Server Started!\n📡 Server running on port 3001\n🌍 Environment: development\n📅 Started at: 2025-08-02T09:20:21.130Z\n🔗 Health Check: http://localhost:3001/api/health\n🔗 API Docs: http://localhost:3001/api-docs\n    ","timestamp":"2025-08-02T09:20:21.132Z"}
+{"level":"info","message":"\n🚀 Smart Attendance System Backend Server Started!\n📡 Server running on port 3001\n🌍 Environment: development\n📅 Started at: 2025-08-02T09:20:53.414Z\n🔗 Health Check: http://localhost:3001/api/health\n🔗 API Docs: http://localhost:3001/api-docs\n    ","timestamp":"2025-08-02T09:20:53.415Z"}
+{"level":"info","message":"\n🚀 Smart Attendance System Backend Server Started!\n📡 Server running on port 3001\n🌍 Environment: development\n📅 Started at: 2025-08-02T09:21:13.956Z\n🔗 Health Check: http://localhost:3001/api/health\n🔗 API Docs: http://localhost:3001/api-docs\n    ","timestamp":"2025-08-02T09:21:13.959Z"}
+{"level":"info","message":"\n🚀 Smart Attendance System Backend Server Started!\n📡 Server running on port 3001\n🌍 Environment: development\n📅 Started at: 2025-08-02T09:22:29.790Z\n🔗 Health Check: http://localhost:3001/api/health\n🔗 API Docs: http://localhost:3001/api-docs\n    ","timestamp":"2025-08-02T09:22:29.793Z"}
+{"level":"info","message":"GET /api-docs","timestamp":"2025-08-02T09:22:55.068Z"}
+{"level":"info","message":"GET /api-docs/","timestamp":"2025-08-02T09:22:55.091Z"}
+{"level":"info","message":"GET /api-docs/swagger-ui.css","timestamp":"2025-08-02T09:22:55.229Z"}
+{"level":"info","message":"GET /api-docs/swagger-ui-bundle.js","timestamp":"2025-08-02T09:22:55.240Z"}
+{"level":"info","message":"GET /api-docs/swagger-ui-standalone-preset.js","timestamp":"2025-08-02T09:22:55.246Z"}
+{"level":"info","message":"GET /api-docs/swagger-ui-init.js","timestamp":"2025-08-02T09:22:55.249Z"}
+{"level":"info","message":"GET /api-docs/favicon-32x32.png","timestamp":"2025-08-02T09:22:56.729Z"}
+{"level":"info","message":"POST /api/auth/register","timestamp":"2025-08-02T09:23:15.358Z"}
+{"level":"error","message":"Failed to connect to the database: Access denied for user ''@'localhost' (using password: YES)","timestamp":"2025-08-03T07:05:00.729Z"}
