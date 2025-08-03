@@ -1,5 +1,5 @@
 const { pool } = require('../utils/db');
-const { haversineDistance } = require('../utils/geolocation');
+const { haversineDistance } = require('../utils/geoLocation');
 const logger = require('../utils/logger');
 
 const markAttendance = async (req, res) => {
