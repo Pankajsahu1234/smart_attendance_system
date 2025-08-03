@@ -5,7 +5,7 @@ const express = require('express');
      const restrictTo = require('../middleware/restrictTo');
 
      router.use(auth, restrictTo('student'));
-     router.post('/mark-attendance', studentController.markAttendance);
+     router.post('/attendance', studentController.markAttendance);
      router.get('/attendance', studentController.getAttendance);
 
      module.exports = router;
