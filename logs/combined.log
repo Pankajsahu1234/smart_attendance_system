@@ -24,3 +24,5 @@
 {"level":"error","message":"Failed to connect to the database: connect ECONNREFUSED 127.0.0.1:3306","timestamp":"2025-08-05T07:23:56.152Z"}
 {"level":"info","message":"\n🚀 Smart Attendance System Backend Server Started!\n📡 Server running on port 3001\n🌍 Environment: development\n📅 Started at: 2025-08-05T07:25:05.721Z\n🔗 Health Check: http://localhost:3001/api/health\n🔗 API Docs: http://localhost:3001/api-docs\n    ","timestamp":"2025-08-05T07:25:05.721Z"}
 {"level":"error","message":"Failed to connect to the database: connect ECONNREFUSED 127.0.0.1:3306","timestamp":"2025-08-05T07:25:05.781Z"}
+{"level":"info","message":"\n🚀 Smart Attendance System Backend Server Started!\n📡 Server running on port 3001\n🌍 Environment: development\n📅 Started at: 2025-08-05T08:19:13.334Z\n🔗 Health Check: http://localhost:3001/api/health\n🔗 API Docs: http://localhost:3001/api-docs\n    ","timestamp":"2025-08-05T08:19:13.335Z"}
+{"level":"error","message":"Failed to connect to the database: connect ECONNREFUSED 127.0.0.1:3306","timestamp":"2025-08-05T08:19:13.353Z"}
