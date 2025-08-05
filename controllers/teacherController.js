@@ -126,20 +126,29 @@ const { pool } = require('../utils/db');
        } catch (error) {
          logger.error(`Error closing QR session: ${error.message}`);
          res.status(500).json({ success: false, message: 'Error closing QR session' });
-    }
-  };
-
-  const getTeacherSubjects = async (req, res) => {
-    const teacher_id = req.user.reference_id;
-
-    try {
-      const [subjects] = await pool.query(
-        'SELECT subject_id, subject_code, subject_name FROM subjects WHERE teacher_id = ?',
-        [teacher_id]
-      );
-
-      res.json({ success: true, data: subjects });
-    } catch (error) {
-      logger.error(`Error fetching teacher subjects: ${error.message}`);
-      res.status(500).json({ success: false, message: 'Error fetching subjects' });
        }
+     };
+
+     const getTeacherSubjects = async (req, res) => {
+       const teacher_id = req.user.reference_id;
+
+       try {
+         const [subjects] = await pool.query(
+           'SELECT subject_id, subject_code, subject_name FROM subjects WHERE teacher_id = ?',
+           [teacher_id]
+         );
+
+         res.json({ success: true, data: subjects });
+       } catch (error) {
+         logger.error(`Error fetching teacher subjects: ${error.message}`);
+         res.status(500).json({ success: false, message: 'Error fetching subjects' });
+       }
+     };
+
+     module.exports = {
+       createQRSession,
+       getActiveQRSessions,
+       getAttendance,
+       closeQRSession,
+       getTeacherSubjects
+     };
