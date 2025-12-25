@@ -14,3 +14,4 @@
 {"level":"error","message":"Failed to connect to the database: connect ECONNREFUSED 127.0.0.1:3306","timestamp":"2025-08-07T13:40:29.871Z"}
 {"level":"error","message":"Failed to connect to the database: connect ECONNREFUSED 127.0.0.1:3306","timestamp":"2025-08-17T19:45:00.650Z"}
 {"level":"error","message":"Failed to connect to the database: connect ECONNREFUSED 127.0.0.1:3306","timestamp":"2025-12-25T13:55:35.099Z"}
+{"level":"error","message":"Failed to connect to the database: connect ECONNREFUSED 127.0.0.1:3306","timestamp":"2025-12-25T13:55:43.065Z"}
